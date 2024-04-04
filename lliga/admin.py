@@ -6,31 +6,33 @@ class EventInline(admin.TabularInline):
     fields = ["temps","tipus","jugador","equip"]
     ordering = ("temps",)
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # filtrem els jugadors i només deixem els que siguin d'algun dels 2 equips (local o visitant)
-        """
-        partit_id = request.resolver_match.kwargs["object_id"]
-        partit = Partit.objects.get(pk=partit_id)
-        equips_ids = [partit.local.id,partit.visitant.id]
-        qs = Equip.objects.filter(id__in=equips_ids)
-        if db_field.name == "equip":
-            kwargs["queryset"] = qs
-        if db_field.name == "jugador":
-            kwargs["queryset"] = Jugador.objects.filter(equip__in=qs)
-        """
-        if db_field.name == "equip" or db_field.name == "equip2":
+        try:
+            """
             partit_id = request.resolver_match.kwargs["object_id"]
             partit = Partit.objects.get(pk=partit_id)
             equips_ids = [partit.local.id,partit.visitant.id]
             qs = Equip.objects.filter(id__in=equips_ids)
-            kwargs["queryset"] = qs
-        elif db_field.name == "jugador":
-            partit_id = request.resolver_match.kwargs['object_id']
-            partit = Partit.objects.get(id=partit_id)
-            jugadors_local = [jugador.id for jugador in partit.local.jugador_set.all()]
-            jugadors_visitant = [jugador.id for jugador in partit.visitant.jugador_set.all()]
-            jugadors = jugadors_local + jugadors_visitant
-            kwargs["queryset"] = Jugador.objects.filter(id__in=jugadors)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+            if db_field.name == "equip":
+                kwargs["queryset"] = qs
+            if db_field.name == "jugador":
+                kwargs["queryset"] = Jugador.objects.filter(equip__in=qs)
+            """
+            if db_field.name == "equip" or db_field.name == "equip2":
+                partit_id = request.resolver_match.kwargs["object_id"]
+                partit = Partit.objects.get(pk=partit_id)
+                equips_ids = [partit.local.id,partit.visitant.id]
+                qs = Equip.objects.filter(id__in=equips_ids)
+                kwargs["queryset"] = qs
+            elif db_field.name == "jugador":
+                partit_id = request.resolver_match.kwargs['object_id']
+                partit = Partit.objects.get(id=partit_id)
+                jugadors_local = [jugador.id for jugador in partit.local.jugador_set.all()]
+                jugadors_visitant = [jugador.id for jugador in partit.visitant.jugador_set.all()]
+                jugadors = jugadors_local + jugadors_visitant
+                kwargs["queryset"] = Jugador.objects.filter(id__in=jugadors)
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
+        except:
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
 class PartitAdmin(admin.ModelAdmin):
         # podem fer cerques en els models relacionats
